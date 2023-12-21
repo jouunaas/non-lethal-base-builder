@@ -14,24 +14,29 @@ UInventoryComponent::UInventoryComponent()
 void UInventoryComponent::AddItem(UItem* item) {
 	if (!item) { return; }
 
-    for (UItem* invItem : inventoryItems) {
-        if (invItem && invItem->bStackable && IsItemStackable(invItem, item)) {
-            // If the items can be stacked, calculate the remaining space in the stack
-            int32 remainingSpace = invItem->maxItemCount - invItem->itemCount;
+    int32 openSlots = invSlots - inventoryItems.Num();
+    if (openSlots > 0) {
+        /*if ()*/ // maybe need to check if the item first of all is stackable at all?
+        for (UItem* invItem : inventoryItems) {
+            if (invItem && invItem->bStackable && IsItemStackable(invItem, item)) {
+                // if items can stack, calculate remaining space in the stack
+                int32 remainingSpace = invItem->maxItemCount - invItem->itemCount;
 
-            // Add as many items as possible to the existing stack
-            int32 numItemsToAdd = FMath::Min(remainingSpace, item->itemCount);
-            invItem->itemCount += numItemsToAdd;
+                // add as many items as possible to the existing stack
+                int32 numItemsToAdd = FMath::Min(remainingSpace, item->itemCount);
+                invItem->itemCount += numItemsToAdd;
 
-            // If there are remaining items, add them as a new stack
-            int32 remainingItems = item->itemCount - numItemsToAdd;
-            if (remainingItems > 0) {
-                UItem* remainingItem = DuplicateObject(item, nullptr);
-                remainingItem->itemCount = remainingItems;
-                inventoryItems.Add(remainingItem);
+                // if there are items remaining, add them as a new stack
+                int32 remainingItems = item->itemCount - numItemsToAdd;
+                if (remainingItems > 0) {
+                    UItem* remainingItem = DuplicateObject(item, nullptr);
+                    remainingItem->itemCount = remainingItems;
+                    inventoryItems.Add(remainingItem);
+                }
+                return;
             }
-            return;
         }
+        //inventoryItems.Add(item);
     }
 }
 

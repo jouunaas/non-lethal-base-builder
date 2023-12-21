@@ -26,6 +26,9 @@ public:
 	TArray<UItem*> GetInventoryItems() const;
 
 private:
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	int32 invSlots;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<UItem*> inventoryItems;
 
