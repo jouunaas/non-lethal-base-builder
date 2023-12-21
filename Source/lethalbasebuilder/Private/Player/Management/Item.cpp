@@ -6,4 +6,8 @@
 UItem::UItem()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+	bStackable = false;
+	itemCount = 1;
+	maxItemCount = 1;
 }

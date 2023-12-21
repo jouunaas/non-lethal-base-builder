@@ -16,28 +16,33 @@ void UInventoryComponent::AddItem(UItem* item) {
 
     int32 openSlots = invSlots - inventoryItems.Num();
     if (openSlots > 0) {
-        /*if ()*/ // maybe need to check if the item first of all is stackable at all?
-        for (UItem* invItem : inventoryItems) {
-            if (invItem && invItem->bStackable && IsItemStackable(invItem, item)) {
-                // if items can stack, calculate remaining space in the stack
-                int32 remainingSpace = invItem->maxItemCount - invItem->itemCount;
+        if (item->bStackable) {
+            for (UItem* invItem : inventoryItems) {
+                if (invItem && invItem->bStackable && IsItemStackable(invItem, item)) {
+                    // if items can stack, calculate remaining space in the stack
+                    int32 remainingSpace = invItem->maxItemCount - invItem->itemCount;
 
-                // add as many items as possible to the existing stack
-                int32 numItemsToAdd = FMath::Min(remainingSpace, item->itemCount);
-                invItem->itemCount += numItemsToAdd;
+                    // add as many items as possible to the existing stack
+                    int32 numItemsToAdd = FMath::Min(remainingSpace, item->itemCount);
+                    invItem->itemCount += numItemsToAdd;
 
-                // if there are items remaining, add them as a new stack
-                int32 remainingItems = item->itemCount - numItemsToAdd;
-                if (remainingItems > 0) {
-                    UItem* remainingItem = DuplicateObject(item, nullptr);
-                    remainingItem->itemCount = remainingItems;
-                    inventoryItems.Add(remainingItem);
+                    // if there are items remaining, add them as a new stack
+                    int32 remainingItems = item->itemCount - numItemsToAdd;
+                    if (remainingItems > 0) {
+                        UItem* remainingItem = DuplicateObject(item, nullptr);
+                        remainingItem->itemCount = remainingItems;
+                        inventoryItems.Add(remainingItem);
+                    }
+                    return;
                 }
-                return;
             }
+            //inventoryItems.Add(item);
         }
-        //inventoryItems.Add(item);
+        else {
+            // TODO: add the item to an empty slot
+        }
     }
+    else { return; } // TODO: make it swap the item on the ground with the item selected
 }
 
 void UInventoryComponent::RemoveItem(UItem* item) {
@@ -46,6 +51,15 @@ void UInventoryComponent::RemoveItem(UItem* item) {
 
 TArray<UItem*> UInventoryComponent::GetInventoryItems() const {
 	return inventoryItems;
+}
+
+UItem* UInventoryComponent::FindItemFromInventory(UItem* item){
+    for (UItem* invItem : inventoryItems) {
+        if (invItem == item) {
+            return invItem;
+        }
+    }
+    return nullptr; // item not found
 }
 
 bool UInventoryComponent::IsItemStackable(const UItem* a, const UItem* b) const {

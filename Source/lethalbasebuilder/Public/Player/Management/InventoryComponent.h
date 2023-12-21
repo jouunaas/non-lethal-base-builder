@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "InventoryComponent.generated.h"
 #include "Item.h"
+#include "InventoryComponent.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LETHALBASEBUILDER_API UInventoryComponent : public UActorComponent
@@ -25,12 +25,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	TArray<UItem*> GetInventoryItems() const;
 
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	UItem* FindItemFromInventory(UItem* item);
 private:
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	int32 invSlots;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere)
 	TArray<UItem*> inventoryItems;
 
-	bool IsItemStackable(const UItem* Item1, const UItem* Item2) const
+	bool IsItemStackable(const UItem* Item1, const UItem* Item2) const;
 };

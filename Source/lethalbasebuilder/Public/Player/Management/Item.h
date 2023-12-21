@@ -12,9 +12,9 @@ class LETHALBASEBUILDER_API UItem : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
-	UItem();
-
+    // Sets default values for this component's properties
+    UItem();
+    
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
     UTexture2D* itemImage;
 
@@ -35,9 +35,4 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
     int32 maxItemCount;
-
-    UItem()
-        : bStackable(false), itemCount(1), maxItemCount(1)
-    {
-    }
 };
