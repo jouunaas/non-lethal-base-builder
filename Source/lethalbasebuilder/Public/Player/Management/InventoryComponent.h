@@ -3,24 +3,31 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
+#include "Item.h"
 
-UCLASS()
-class LETHALBASEBUILDER_API AInventoryComponent : public AActor
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class LETHALBASEBUILDER_API UInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
+
+public:	
+	// Sets default values for this component's properties
+	UInventoryComponent();
 	
-public:	
-	// Sets default values for this actor's properties
-	AInventoryComponent();
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void AddItem(UItem* item);
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void RemoveItem(UItem* item);
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	TArray<UItem*> GetInventoryItems() const;
 
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<UItem*> inventoryItems;
+
+	bool IsItemStackable(const UItem* Item1, const UItem* Item2) const
 };
