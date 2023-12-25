@@ -12,65 +12,47 @@ UInventoryComponent::UInventoryComponent()
 }
 
 void UInventoryComponent::AddItem(UItem* item) {
-	if (!item) { return; }
+    if (!item) { return; }
 
-    int32 openSlots = invSlots - inventoryItems.Num();
-    if (openSlots > 0) {
-        if (item->bStackable) {
-            for (UItem* invItem : inventoryItems) {
-                if (invItem && invItem->bStackable && IsItemStackable(invItem, item)) {
-                    // if items can stack, calculate remaining space in the stack
-                    int32 remainingSpace = invItem->maxItemCount - invItem->itemCount;
+    if (item->bStackable) {
+        // find existing stack to stack the item
+        for (const FSlot& slot : invSlots) {
+            if (slot.item && IsItemStackable(slot.item, item)) {
+                // calculate remaining space in the stack
+                int32 remainingSpace = slot.item->maxItemCount - slot.item->itemCount;
 
-                    // add as many items as possible to the existing stack
-                    int32 numItemsToAdd = FMath::Min(remainingSpace, item->itemCount);
-                    invItem->itemCount += numItemsToAdd;
+                // add as many items as possible to the existing stack
+                int32 numItemsToAdd = FMath::Min(remainingSpace, item->itemCount);
 
-                    // if there are items remaining, add them as a new stack
-                    int32 remainingItems = item->itemCount - numItemsToAdd;
-                    if (remainingItems > 0) {
-                        UItem* remainingItem = DuplicateObject(item, nullptr);
-                        remainingItem->itemCount = remainingItems;
-                        inventoryItems.Add(remainingItem);
-                    }
-                    return;
-                }
+                // update item counts
+                slot.item->itemCount += numItemsToAdd;
+                item->itemCount -= numItemsToAdd;
+
+                // if items left, recursively call func again
+                if (item->itemCount > 0) { AddItem(item); }
+                return; // item has been stacked, exit the function
             }
-            //inventoryItems.Add(item);
-        }
-        else {
-            // TODO: add the item to an empty slot
         }
     }
-    else { return; } // TODO: make it swap the item on the ground with the item selected
+
+    // if item isnt stackable or no stackable slot found, try to find empty slot
+    for (FSlot& slot : invSlots) {
+        if (slot.item == nullptr) {
+            slot.item = item;
+        }
+    }
 }
 
 void UInventoryComponent::RemoveItem(UItem* item) {
-	inventoryItems.Remove(item);
-}
-
-TArray<UItem*> UInventoryComponent::GetInventoryItems() const {
-	return inventoryItems;
-}
-
-UItem* UInventoryComponent::FindItemFromInventory(UItem* item){
-    for (UItem* invItem : inventoryItems) {
-        if (invItem == item) {
-            return invItem;
-        }
-    }
-    return nullptr; // item not found
+	//TODO: REMOVE ITEM
 }
 
 bool UInventoryComponent::IsItemStackable(const UItem* a, const UItem* b) const {
-    // TODO: maybe implement logic for comparing item properties like weight, name etc.
-
-    // check if items are same category and are stackable
-    bool bSameCategory = a->itemName == b->itemName;
+    // logic for comparing item properties like weight, name etc.
+    bool bSameItem = a->itemName == b->itemName;
     bool bBothStackable = a->bStackable && b->bStackable;
+    // just checking if the stack is full or not
+    bool bBelowMaxStackCount = a->itemCount < a->maxItemCount;
 
-    // check if stacking exceeds the maximum stack count
-    bool bBelowMaxStackCount = (a->itemCount + b->itemCount) <= a->maxItemCount;
-
-    return bSameCategory && bBothStackable && bBelowMaxStackCount;
+    return bSameItem && bBothStackable && bBelowMaxStackCount;
 }
